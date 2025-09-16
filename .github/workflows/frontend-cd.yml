@@ -47,7 +47,12 @@ on:
 jobs:
   deploy_frontend:
     runs-on: ubuntu-latest
-    # environment: Production
+    env:
+      PRODUCT_API_IP: ${{ inputs.product_api_ip || github.event.inputs.product_api_ip }}
+      ORDER_API_IP: ${{ inputs.order_api_ip || github.event.inputs.order_api_ip }}
+      AKS_CLUSTER_NAME: ${{ inputs.aks_cluster_name || github.event.inputs.aks_cluster_name }}
+      AKS_RESOURCE_GROUP: ${{ inputs.aks_resource_group || github.event.inputs.aks_resource_group  }}
+      ACR_LOGIN_SERVER: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
 
     steps:
       - name: Checkout repository
@@ -67,8 +72,8 @@ jobs:
         run: |
           echo "Injecting IPs into frontend/static/js/main.js"
           # Ensure frontend/main.js is directly in the path for sed
-          sed -i "s|_PRODUCT_API_URL_|${{ inputs.product_api_ip }}|g" frontend/main.js
-          sed -i "s|_ORDER_API_URL_|${{ inputs.order_api_ip }}|g" frontend/main.js
+          sed -i "s|_PRODUCT_API_URL_|${PRODUCT_API_IP}|g" frontend/main.js
+          sed -i "s|_ORDER_API_URL_|${ORDER_API_IP}|g" frontend/main.js
           
           # Display the modified file content for debugging
           echo "--- Modified main.js content ---"
@@ -84,8 +89,8 @@ jobs:
       - name: Set Kubernetes context (get AKS credentials)
         uses: azure/aks-set-context@v3
         with:
-          resource-group: ${{ inputs.aks_resource_group }}
-          cluster-name: ${{ inputs.aks_cluster_name }}
+          resource-group: ${{ env.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ env.AKS_CLUSTER_NAME }}
 
       - name: Deploy Frontend to AKS
         run: |
