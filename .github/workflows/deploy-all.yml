@@ -2,14 +2,24 @@ name: Deploy — Backend then Frontend
 
 on:
   workflow_dispatch:
+    inputs:
+      aks_cluster_name:
+        description: "AKS cluster name"
+        required: true
+      aks_resource_group:
+        description: "AKS resource group"
+        required: true
+      aks_acr_name:
+        description: "ACR name (e.g., myregistry)"
+        required: true
 
 jobs:
   backend:
     uses: ./.github/workflows/backend-cd.yml
     with:
-      aks_cluster_name: "<aks_cluster_name>"
-      aks_resource_group: "<resource_group_name>"
-      aks_acr_name: "<acr_name>"
+      aks_cluster_name: ${{ inputs.aks_cluster_name }}
+      aks_resource_group: ${{ inputs.aks_resource_group }}
+      aks_acr_name: ${{ inputs.aks_acr_name }}
     secrets: inherit
 
   frontend:
@@ -18,6 +28,6 @@ jobs:
     with:
       product_api_ip: ${{ needs.backend.outputs.product_ip }}
       order_api_ip: ${{ needs.backend.outputs.order_ip }}
-      aks_cluster_name: "<aks_cluster_name>"
-      aks_resource_group: "<resource_group_name>"
+      aks_cluster_name: ${{ inputs.aks_cluster_name }}
+      aks_resource_group: ${{ inputs.aks_resource_group }}
     secrets: inherit
