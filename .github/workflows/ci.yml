@@ -3,7 +3,7 @@ name: CI — Backend and Frontend
 
 on:
   push:
-    branches: [dev]  # run CI on pushes to dev
+    branches: [dev, main]  # run CI on pushes to dev
   pull_request:
     branches: [main] # validate PRs targeting main before merge
 
