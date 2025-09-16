@@ -33,6 +33,10 @@ jobs:
   deploy_backend:
     runs-on: ubuntu-latest
     # environment: Production
+    env:
+      AKS_CLUSTER_NAME: ${{ inputs.aks_cluster_name || github.event.inputs.aks_cluster_name }}
+      AKS_RESOURCE_GROUP: ${{ inputs.aks_resource_group || github.event.inputs.aks_resource_group  }}
+      AKS_ACR_NAME: ${{ inputs.aks_acr_name || github.event.inputs.aks_acr_name }}
     
     outputs:
       product_ip: ${{ steps.out_product.outputs.product_ip }}
@@ -50,11 +54,11 @@ jobs:
 
       - name: Set Kubernetes context (get AKS credentials)
         run: |
-          az aks get-credentials --resource-group ${{ github.event.inputs.aks_resource_group }} --name ${{ github.event.inputs.aks_cluster_name }} --overwrite-existing
+          az aks get-credentials --resource-group "${AKS_RESOURCE_GROUP}" --name "${AKS_CLUSTER_NAME}" --overwrite-existing
 
       - name: Attach ACR
         run: |
-          az aks update --name ${{ github.event.inputs.aks_cluster_name }} --resource-group ${{ github.event.inputs.aks_resource_group }} --attach-acr ${{ github.event.inputs.aks_acr_name }}
+          az aks update --name "${AKS_CLUSTER_NAME}" --resource-group "${AKS_RESOURCE_GROUP}" --attach-acr "${AKS_ACR_NAME}"
 
       - name: Deploy Backend Infrastructure (Namespace, ConfigMaps, Secrets, Databases)
         run: |
